@@ -7,4 +7,8 @@ public class Variable {
 	public Variable(int domainSize) {
 		d = domainSize;
 	}
+	
+	public int domainSize() {
+		return d;
+	}
 }

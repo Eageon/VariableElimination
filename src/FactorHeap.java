@@ -98,7 +98,7 @@ public class FactorHeap {
 	public void adjustHeap(int index, int oldDeg) {
 		int a = X[index];
 
-		if (factors.get(index).degree() < oldDeg)
+		if (factors.get(index).numScopes() < oldDeg)
 			percolateUp(a);
 		else
 			percolateDown(a);
