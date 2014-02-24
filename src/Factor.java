@@ -68,4 +68,18 @@ public class Factor {
 		else
 			table.set(index, value);
 	}
+	
+	/**
+	 * var i in the scope
+	 * @param var
+	 * @return whether the var is in the scope of this factor
+	 */
+	public boolean inScope(Variable var) {
+		for(Variable v : variables) {
+			if(var == v)
+				return true;
+		}
+		
+		return false;
+	}
 }
