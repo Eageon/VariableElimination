@@ -47,8 +47,8 @@ public class Factor {
 		
 		for(int i = 0; i < variables.size() - 1; i++) {
 			Variable par = variables.get(i);
-			var.addNeighbor(par);
-			par.addNeighbor(var);
+			var.addNeighbor(par.index);
+			par.addNeighbor(var.index);
 		}
 	}
 

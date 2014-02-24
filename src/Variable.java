@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.LinkedList;
 
 
@@ -6,9 +7,11 @@ public class Variable implements Comparable<Variable> {
 	boolean isEvdence;
 	int value;
 	
+	int index = -1;
+	
 	LinkedList<Variable> parents = new LinkedList<>();
 	LinkedList<Variable> children = new LinkedList<>();
-	LinkedList<Variable> neighbors = new LinkedList<>();
+	LinkedList<Integer> neighbors = new LinkedList<>();
 	
 	public Variable(int domainSize) {
 		d = domainSize;
@@ -43,19 +46,24 @@ public class Variable implements Comparable<Variable> {
 		children.add(child);
 	}
 	
-	public void addNeighbor(Variable neigh) {
+	public void addNeighbor(int neigh) {
 		neighbors.add(neigh);
 	}
 	
-	public void destroyGraph() {
-		for(Variable n : neighbors) {
-			n.neighbors.remove(this);
+	public void removeNeighbor(Integer nei) {
+		neighbors.remove(nei);
+	}
+	
+	public void destroyVariableInGraph(ArrayList<Variable> graph) {
+		for(Integer n : neighbors) {
+			Variable nei = graph.get(n);
+			nei.removeNeighbor(index);
 		}
 		neighbors = null;
 	}
 	
-	public boolean isAdjacent(Variable var) {
-		for(Variable nei : neighbors) {
+	public boolean isAdjacent(int var) {
+		for(Integer nei : neighbors) {
 			if(var == nei)
 				return true;
 		}

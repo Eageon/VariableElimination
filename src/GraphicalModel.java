@@ -56,9 +56,11 @@ public class GraphicalModel {
 		String[] domains = line3.split(" ");
 
 		// set variables
+		int indexVar = 0;
 		for (String s : domains) {
 			int domainSize = Integer.valueOf(s);
 			Variable v = new Variable(domainSize);
+			v.index = indexVar++;
 			variables.add(v);
 		}
 
@@ -143,9 +145,11 @@ public class GraphicalModel {
 		String[] domains = line3.split(" ");
 
 		// set variables
+		int indexVar = 0;
 		for (String s : domains) {
 			int domainSize = Integer.valueOf(s);
 			Variable v = new Variable(domainSize);
+			v.index = indexVar++;
 			variables.add(v);
 		}
 
@@ -319,10 +323,11 @@ public class GraphicalModel {
 			orderVariables.add(minDegree);
 			
 			// add edge to non-adjacent neighbor variables
-			for(Variable v: minDegree.neighbors) {
+			for(int indexV: minDegree.neighbors) {
 				boolean begin = false;
-				for(Variable n: minDegree.neighbors) {
-					if(n == v) {
+				Variable v = variables.get(indexV);
+				for(int indexN: minDegree.neighbors) {
+					if(indexN == indexV) {
 						begin = true;
 						continue;
 					}
@@ -331,17 +336,19 @@ public class GraphicalModel {
 						continue;
 					}
 					
+					Variable n = variables.get(indexN);
+					
 					// then begin at the variable behind the v
-					if(n.isAdjacent(v)) {
+					if(n.isAdjacent(indexV)) {
 						continue;
 					}
 					
 					// not adjacent then add edge
-					n.addNeighbor(v);
-					v.addNeighbor(n);
+					n.addNeighbor(indexV);
+					v.addNeighbor(indexN);
 				}	
 			}
-			minDegree.destroyGraph();
+			minDegree.destroyVariableInGraph(variables);
 		}
 	}
 
