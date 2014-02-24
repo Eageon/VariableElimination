@@ -1,14 +1,8 @@
 import java.util.ArrayList;
 
-public class Factor implements Comparable<Factor> {
+public class Factor {
 	ArrayList<Variable> variables = null;
 	ArrayList<Double> table = null;
-
-	@Override
-	public int compareTo(Factor o) {
-		// TODO Auto-generated method stub
-		return this.variables.size() - o.variables.size();
-	}
 
 	public int numColomns() {
 		return variables.get(variables.size() - 1).domainSize();
@@ -46,6 +40,16 @@ public class Factor implements Comparable<Factor> {
 			variables.add(variable);
 		else
 			variables.set(index, variable);
+	}
+	
+	public void setGraph() {
+		Variable var = variables.get(variables.size() - 1);
+		
+		for(int i = 0; i < variables.size() - 1; i++) {
+			Variable par = variables.get(i);
+			var.addNeighbor(par);
+			par.addNeighbor(var);
+		}
 	}
 
 	public double getTabelValue(int index) {
