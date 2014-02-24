@@ -262,7 +262,7 @@ public class GraphicalModel {
 		}
 	}
 
-	public void readEvidence(String fileName) throws IOException {
+	public void readEvidence(String fileName) {
 		BufferedReader reader = null;
 		try {
 			reader = new BufferedReader(new FileReader(fileName));
@@ -272,35 +272,49 @@ public class GraphicalModel {
 		}
 
 		String numEvidenceLine = null;
-		if (null == (numEvidenceLine = reader.readLine())) {
-			System.out.println("Format error: Can NOT read number of evidence");
-			System.exit(-1);
+		try {
+			if (null == (numEvidenceLine = reader.readLine())) {
+				System.out.println("Format error: Can NOT read number of evidence");
+				System.exit(-1);
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 
 		int numEvidence = Integer.valueOf(numEvidenceLine);
 
 		String line = null;
 		int actualEvidence = 0;
-		while (null != (line = reader.readLine())) {
-			if (line.equals("")) {
-				continue; // escape the newline
+		try {
+			while (null != (line = reader.readLine())) {
+				if (line.equals("")) {
+					continue; // escape the newline
+				}
+
+				actualEvidence++;
+
+				line = line.trim();
+				line = line.replaceAll("\\s+", " ");
+				String[] args = line.split(" |\t");
+				if (2 != args.length) {
+					System.out
+							.println("Format error: Evidence line must contain exact two argument");
+					System.exit(-1);
+				}
+
+				int indexVariable = Integer.valueOf(args[0]);
+				int value = Integer.valueOf(args[1]);
+
+				Variable variable = variables.get(indexVariable);
+				variable.setEvidence(value);
 			}
-
-			actualEvidence++;
-
-			line = line.trim();
-			String[] args = line.split("\t| ");
-			if (2 != args.length) {
-				System.out
-						.println("Format error: Evidence line must contain exact two argument");
-				System.exit(-1);
-			}
-
-			int indexVariable = Integer.valueOf(args[0]);
-			int value = Integer.valueOf(args[1]);
-
-			Variable variable = variables.get(indexVariable);
-			variable.setEvidence(value);
+		} catch (NumberFormatException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 
 		if (actualEvidence != numEvidence) {
@@ -357,6 +371,7 @@ public class GraphicalModel {
 
 		GraphicalModel model = new GraphicalModel(fileName);
 		model.computeOrder();
+		model.readEvidence(fileName + ".evid");
 		System.out.println("Succeed!");
 	}
 }
