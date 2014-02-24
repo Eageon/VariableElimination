@@ -91,10 +91,10 @@ public class VariableHeap {
 	 * @param index of factor in raw array.
 	 * @param newDeg
 	 */
-	public void adjustHeap(int index, int oldDeg) {
+	public void adjustHeap(int index, boolean isDecreaseDegree) {
 		int a = X[index];
 
-		if (variables.get(index).degree() < oldDeg)
+		if (isDecreaseDegree)
 			percolateUp(a);
 		else
 			percolateDown(a);

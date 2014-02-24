@@ -295,8 +295,8 @@ public class GraphicalModel {
 				actualEvidence++;
 
 				line = line.trim();
-				line = line.replaceAll("\\s+", " ");
-				String[] args = line.split(" |\t");
+				//line = line.replaceAll("\\s+", " ");
+				String[] args = line.split("\\s+|\t");
 				if (2 != args.length) {
 					System.out
 							.println("Format error: Evidence line must contain exact two argument");
@@ -359,10 +359,18 @@ public class GraphicalModel {
 					
 					// not adjacent then add edge
 					n.addNeighbor(indexV);
+					minHeap.adjustHeap(indexV, false);
 					v.addNeighbor(indexN);
+					minHeap.adjustHeap(indexN, false);
 				}	
 			}
+			
+			for(Integer n : minDegree.neighbors) {
+				minHeap.adjustHeap(n, true);
+			}
 			minDegree.destroyVariableInGraph(variables);
+			
+			
 		}
 	}
 
