@@ -18,6 +18,10 @@ public class Factor {
 
 		variables = new ArrayList<>(numScopes);
 	}
+	
+	public Factor(ArrayList<Variable> vars) {
+		variables = vars;
+	}
 
 	public void initTable(int num) {
 		if (0 > num)
@@ -81,5 +85,42 @@ public class Factor {
 		}
 		
 		return false;
+	}
+	
+	/**
+	 * 
+	 * @param index of table
+	 * @return the set of the values of correspanding variables
+	 */
+	public int[] tableIndexToVaraibleValue(int index) {
+		int[] values = new int[variables.size()];
+		
+		int denum = table.size();
+		
+		for (int i = 0; i < values.length; i++) {
+			denum /= variables.get(i).domainSize();
+			int trueValue = index / denum;
+			index %= denum;
+			values[i] = trueValue;
+		}
+		
+		return values;
+	}
+	
+	/**
+	 * do reversely with tableIndexToVaraibleValue
+	 * @param values the indices of values of variables
+	 * @return
+	 */
+	public int variableValueToTableIndex(int[] values) {
+		int multi = 1;
+		int index = 0;
+		
+		for (int i = values.length - 1; i >= 0; i++) {
+			index += values[i] * multi;
+			multi *= variables.get(i).domainSize();
+		}
+		
+		return index;
 	}
 }

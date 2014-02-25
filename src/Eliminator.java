@@ -23,6 +23,8 @@ public class Eliminator {
 		}
 	}
 	
+	
+	
 	private void sortVaraiblesToElminatedByOrdering() {
 		Collections.sort(variablesToEliminated, new OrderComparator());
 	}
@@ -63,11 +65,12 @@ public class Eliminator {
 	}
 	
 	private Factor Product(ArrayList<Factor> factorPrime) {
-		HashSet<Variable> set = new HashSet<>();
+		LinkedList<Variable> set = new LinkedList<>();
 		
 		for(Factor factor : factorPrime) {
 			for(Variable var : factor.variables) {
-				set.add(var);
+				if(!set.contains(var))
+					set.add(var);
 			}
 		}
 		
@@ -78,20 +81,46 @@ public class Eliminator {
 			numTables *= var.domainSize();
 		}
 		
-		Factor fRet = new Factor(Z.size());
+		Factor fRet = new Factor(Z);
 		fRet.initTable(numTables);
 		for (int i = 0; i < fRet.table.size(); i++) {
 			fRet.table.set(i, 1.0);
 		}
 		
+		
 		// for each instantiation
 		for (int z = 0; z < fRet.table.size(); z++) {
+			Factor zFactor = factorPrime.get(z);
+			int[] zValueIndex = zFactor.tableIndexToVaraibleValue(z);
+			
 			for (int i = 0; i < factorPrime.size(); i++) {
+				Factor xFactor = factorPrime.get(i);
+				int[] primeValues = new int[xFactor.numScopes()];
+				// find the same variable
+				for (int j = 0; j < primeValues.length; j++) {
+					for (int m = 0; m < zValueIndex.length; m++) {
+						if(zFactor.variables.get(m) == xFactor.variables.get(j)) {
+							primeValues[j] = zValueIndex[m];
+							break;
+						}
+					}
+				}
 				
+				int xTableIndex = xFactor.variableValueToTableIndex(primeValues);
+				// the multiply two double;
+				fRet.table.set(z, zFactor.table.get(z) * xFactor.table.get(xTableIndex));
 			}
 		}
 		
-		return null;
+		return fRet;
+	}
+	
+	private double xConsistentWithZ(ArrayList<Factor> z, int[] zValueIndex) {
+		for (int i = 0; i < zValueIndex.length; i++) {
+			
+		}
+		
+		return 0.0;
 	}
 	
 	private Factor SumOut(Factor bigFi, Variable var) {
