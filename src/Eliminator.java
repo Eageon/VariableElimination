@@ -90,8 +90,8 @@ public class Eliminator {
 		
 		// for each instantiation
 		for (int z = 0; z < fRet.table.size(); z++) {
-			Factor zFactor = factorPrime.get(z);
-			int[] zValueIndex = zFactor.tableIndexToVaraibleValue(z);
+			//Factor zFactor = factorPrime.get(z);
+			int[] zValueIndex = fRet.tableIndexToVaraibleValue(z);
 			
 			for (int i = 0; i < factorPrime.size(); i++) {
 				Factor xFactor = factorPrime.get(i);
@@ -99,16 +99,16 @@ public class Eliminator {
 				// find the same variable
 				for (int j = 0; j < primeValues.length; j++) {
 					for (int m = 0; m < zValueIndex.length; m++) {
-						if(zFactor.variables.get(m) == xFactor.variables.get(j)) {
+						if(fRet.variables.get(m) == xFactor.variables.get(j)) {
 							primeValues[j] = zValueIndex[m];
-							break;
+							break; // need to improve
 						}
 					}
 				}
 				
 				int xTableIndex = xFactor.variableValueToTableIndex(primeValues);
 				// the multiply two double;
-				fRet.table.set(z, zFactor.table.get(z) * xFactor.table.get(xTableIndex));
+				fRet.table.set(z, fRet.table.get(z) * xFactor.table.get(xTableIndex));
 			}
 		}
 		
