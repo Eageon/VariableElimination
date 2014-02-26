@@ -9,7 +9,7 @@ public class Variable implements Comparable<Variable> {
 	
 	int index = -1;
 	
-	LinkedList<Integer> neighbors = new LinkedList<>();
+	LinkedList<Variable> neighbors = new LinkedList<>();
 	LinkedList<Factor> factorMentionThis = new LinkedList<>();
 	
 	public Variable(int domainSize) {
@@ -42,24 +42,24 @@ public class Variable implements Comparable<Variable> {
 		return this.degree() - o.degree();
 	}
 	
-	public void addNeighbor(int neigh) {
-		neighbors.add(neigh);
+	public void addNeighbor(Variable neigh) {
+		if(!neighbors.contains(neigh))
+			neighbors.add(neigh);
 	}
 	
-	public void removeNeighbor(Integer nei) {
+	public void removeNeighbor(Variable nei) {
 		neighbors.remove(nei);
 	}
 	
-	public void destroyVariableInGraph(ArrayList<Variable> graph) {
-		for(Integer n : neighbors) {
-			Variable nei = graph.get(n);
-			nei.removeNeighbor(index);
+	public void destroyVariableNeighborhood() {
+		for(Variable nei : neighbors) {		
+			nei.removeNeighbor(this);
 		}
-		neighbors = null;
+		
 	}
 	
-	public boolean isAdjacent(int var) {
-		for(Integer nei : neighbors) {
+	public boolean isAdjacent(Variable var) {
+		for(Variable nei : neighbors) {
 			if(var == nei)
 				return true;
 		}

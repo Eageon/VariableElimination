@@ -1,7 +1,9 @@
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.LinkedList;
 
@@ -12,6 +14,8 @@ public class GraphicalModel {
 	ArrayList<Variable> variables;
 
 	LinkedList<Variable> orderVariables;
+	
+	String network;
 
 	public GraphicalModel(String fileName) {
 		buildModel(fileName);
@@ -48,49 +52,8 @@ public class GraphicalModel {
 	// @SuppressWarnings({ "null", "unused" })
 	private void buildMarkovNetwork(BufferedReader reader)
 			throws NumberFormatException, IOException {
-		int size = Integer.valueOf(reader.readLine());
-		numVariables = size;
-		variables = new ArrayList<>(size);
-
-		String line3 = reader.readLine();
-		String[] domains = line3.split(" ");
-
-		// set variables
-		int indexVar = 0;
-		for (String s : domains) {
-			int domainSize = Integer.valueOf(s);
-			Variable v = new Variable(domainSize);
-			v.index = indexVar++;
-			variables.add(v);
-		}
-
-		String line4 = reader.readLine();
-		int numFactors = Integer.valueOf(line4);
-		factors = new ArrayList<>(numFactors);
-
-		// initialize factors without setting the table
-		String factorLine = null;
-		while (null != (factorLine = reader.readLine())
-				&& !factorLine.equals("")) {
-			String[] args = factorLine.split("\t| ");
-			if (2 > args.length)
-				continue;
-			int indexLastVariable = Integer.valueOf(args[args.length - 1]);
-			int numScopes = Integer.valueOf(args[0]);
-			// variables.get(indexLastVariable).domainSize();
-			Factor factor = new Factor(numScopes);
-			factors.add(factor);
-
-			for (int i = 1; i < args.length; i++) {
-				int indexVaraible = Integer.valueOf(args[i]);
-				factor.setVariable(i - 1, this.getVariable(indexVaraible));
-			}
-		}
-
-		if (null == factorLine) {
-			System.out.println("File Format problem");
-			System.exit(-1);
-		}
+		
+		buildVariableAndFactorWithValue(reader);
 
 		// Then set CPT
 		int indexFactor = 0;
@@ -128,20 +91,23 @@ public class GraphicalModel {
 			}
 		}
 
-		if (actualCount != numFactors) {
+		if (actualCount != factors.size()) {
 			System.out
 					.println("Format error: actual Factor data less the preamble");
 			System.exit(-1);
 		}
 	}
-
-	private void buildBayesianNetwork(BufferedReader reader)
-			throws NumberFormatException, IOException {
+	
+	private void buildVariableAndFactorWithValue(BufferedReader reader) throws NumberFormatException, IOException {
 		int size = Integer.valueOf(reader.readLine());
 		numVariables = size;
 		variables = new ArrayList<>(size);
-
-		String line3 = reader.readLine();
+		
+		String line3 = null;
+		while(null != (line3 = reader.readLine())) {
+			if(line3.length() > 1)
+				break;
+		}
 		String[] domains = line3.split(" ");
 
 		// set variables
@@ -172,8 +138,20 @@ public class GraphicalModel {
 			factor.index = factors.size() - 1;
 
 			for (int i = 1; i < args.length; i++) {
-				int indexVaraible = Integer.valueOf(args[i]);
-				factor.setVariable(i - 1, this.getVariable(indexVaraible));
+				int indexVariable = Integer.valueOf(args[i]);
+				factor.setVariable(i - 1, this.getVariable(indexVariable));
+			}
+			
+			// set neighbors of variables
+			for(int i = 1; i < args.length; i++) {
+				int iVar = Integer.valueOf(args[i]);
+				for(int j = 1; j < args.length; j++) {
+					int jVar = Integer.valueOf(args[j]);
+					if(i == j)
+						continue;
+					
+					variables.get(iVar).addNeighbor(variables.get(jVar));
+				}
 			}
 		}
 
@@ -181,7 +159,13 @@ public class GraphicalModel {
 			System.out.println("File Format problem");
 			System.exit(-1);
 		}
+	}
 
+	private void buildBayesianNetwork(BufferedReader reader)
+			throws NumberFormatException, IOException {
+		
+		buildVariableAndFactorWithValue(reader);
+		
 		// Then set CPT / Factor
 		int indexFactor = 0;
 		String head = null;
@@ -227,15 +211,17 @@ public class GraphicalModel {
 				System.out.println("Factor " + i + ": wrong CPT format");
 				System.exit(-1);
 			}
-			factor.setGraph(); // very important
+			// set graph is set neighbors of each variable
+			// it is done by buildVaraibleAndFactorValue
+			//factor.setGraph(); // very important
 		}
 
-		if (actualCount != numFactors) {
+		if (actualCount != factors.size()) {
 			System.out
 					.println("Format error: actual Factor data less the preamble");
 			System.exit(-1);
 		}
-		
+
 	}
 
 	public void buildModel(String fileName) {
@@ -250,8 +236,10 @@ public class GraphicalModel {
 		try {
 			String network = reader.readLine();
 			if (network.equals("MARKOV")) {
+				this.network = "MARKOV";
 				buildMarkovNetwork(reader);
 			} else if (network.equals("BAYES")) {
+				this.network = "BAYES";
 				buildBayesianNetwork(reader);
 			} else {
 				System.out.println("Wrong preamble " + network);
@@ -275,7 +263,8 @@ public class GraphicalModel {
 		String numEvidenceLine = null;
 		try {
 			if (null == (numEvidenceLine = reader.readLine())) {
-				System.out.println("Format error: Can NOT read number of evidence");
+				System.out
+						.println("Format error: Can NOT read number of evidence");
 				System.exit(-1);
 			}
 		} catch (IOException e) {
@@ -283,6 +272,7 @@ public class GraphicalModel {
 			e.printStackTrace();
 		}
 
+		numEvidenceLine = numEvidenceLine.trim();
 		int numEvidence = Integer.valueOf(numEvidenceLine);
 
 		String line = null;
@@ -296,7 +286,7 @@ public class GraphicalModel {
 				actualEvidence++;
 
 				line = line.trim();
-				//line = line.replaceAll("\\s+", " ");
+				// line = line.replaceAll("\\s+", " ");
 				String[] args = line.split("\\s+|\t");
 				if (2 != args.length) {
 					System.out
@@ -308,7 +298,8 @@ public class GraphicalModel {
 				int value = Integer.valueOf(args[1]);
 
 				Variable variable = variables.get(indexVariable);
-				variable.setEvidence(value); // setEvidence will intantiate factor
+				variable.setEvidence(value); // setEvidence will intantiate
+												// factor
 			}
 		} catch (NumberFormatException e) {
 			// TODO Auto-generated catch block
@@ -332,55 +323,56 @@ public class GraphicalModel {
 
 		VariableHeap minHeap = new VariableHeap(variables);
 		minHeap.buildHeap();
+		minHeap.printHeap();
 
 		while (!minHeap.isEmpty()) {
-			Variable minDegree = variables.get(minHeap.deleteMin());
-			orderVariables.add(minDegree);
-			
+			Variable minDegreeVar = variables.get(minHeap.deleteMin());
+			orderVariables.add(minDegreeVar);
+
 			// add edge to non-adjacent neighbor variables
-			for(int indexV: minDegree.neighbors) {
-				boolean begin = false;
-				Variable v = variables.get(indexV);
-				for(int indexN: minDegree.neighbors) {
-					if(indexN == indexV) {
-						begin = true;
+			for (Variable v : minDegreeVar.neighbors) {
+				for (Variable n : minDegreeVar.neighbors) {
+					if (n == v) {
 						continue;
 					}
-					
-					if(false == begin) {
-						continue;
-					}
-					
-					Variable n = variables.get(indexN);
-					
-					// then begin at the variable behind the v
-					if(n.isAdjacent(indexV)) {
-						continue;
-					}
-					
+
 					// not adjacent then add edge
-					n.addNeighbor(indexV);
-					minHeap.adjustHeap(indexV, false);
-					v.addNeighbor(indexN);
-					minHeap.adjustHeap(indexN, false);
-				}	
+					v.addNeighbor(n);	
+				}
+				minHeap.adjustHeap(v.index, false);
 			}
-			
-			for(Integer n : minDegree.neighbors) {
-				minHeap.adjustHeap(n, true);
+
+			// delete minDegreeVar from graph and the edges
+			minDegreeVar.destroyVariableNeighborhood();
+			for (Variable n : minDegreeVar.neighbors) {
+				minHeap.adjustHeap(n.index, true);
 			}
-			minDegree.destroyVariableInGraph(variables);
-			
-			
+			minDegreeVar.neighbors.clear();
 		}
 	}
 
 	public static void main(String[] args) {
-		String fileName = "./BN_4.uai";
+		String fileName = "./grid3x3.uai";
 
-		GraphicalModel model = new GraphicalModel(fileName);
-		model.computeOrder();
-		model.readEvidence(fileName + ".evid");
+		try {
+			PrintStream writer = new PrintStream(fileName + ".output");
+			GraphicalModel model = new GraphicalModel(fileName);
+			writer.println("Network data loading completed: "
+					+ model.variables.size() + " variables, "
+					+ model.factors.size() + " factors");
+			writer.println(model.network + " network");
+			model.computeOrder();
+			writer.println("Ordering computed");
+			writer.println("Order:");
+			for(Variable var : model.orderVariables) {
+				writer.print(var.index + ", ");
+			}
+			writer.println("");
+			model.readEvidence(fileName + ".evid");
+			writer.println("Evidence loaded, and variables instantiation completed");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		System.out.println("Succeed!");
 	}
 }

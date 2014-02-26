@@ -99,4 +99,11 @@ public class VariableHeap {
 		else
 			percolateDown(a);
 	}
+	
+	public void printHeap() {
+		for(Integer index : Q) {
+			System.out.print(index + ", ");
+		}
+		System.out.println("");
+	}
 }

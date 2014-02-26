@@ -49,15 +49,15 @@ public class Factor {
 		variable.addMentionFactor(this);
 	}
 	
-	public void setGraph() {
-		Variable var = variables.get(variables.size() - 1);
-		
-		for(int i = 0; i < variables.size() - 1; i++) {
-			Variable par = variables.get(i);
-			var.addNeighbor(par.index);
-			par.addNeighbor(var.index);
-		}
-	}
+//	public void setGraph() {
+//		Variable var = variables.get(variables.size() - 1);
+//		
+//		for(int i = 0; i < variables.size() - 1; i++) {
+//			Variable par = variables.get(i);
+//			var.addNeighbor(par.index);
+//			par.addNeighbor(var.index);
+//		}
+//	}
 
 	public double getTabelValue(int index) {
 		if (0 > index)
