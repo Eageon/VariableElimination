@@ -169,6 +169,7 @@ public class GraphicalModel {
 			// variables.get(indexLastVariable).domainSize();
 			Factor factor = new Factor(numScopes);
 			factors.add(factor);
+			factor.index = factors.size() - 1;
 
 			for (int i = 1; i < args.length; i++) {
 				int indexVaraible = Integer.valueOf(args[i]);
@@ -181,7 +182,7 @@ public class GraphicalModel {
 			System.exit(-1);
 		}
 
-		// Then set CPT
+		// Then set CPT / Factor
 		int indexFactor = 0;
 		String head = null;
 		int actualCount = 0;
@@ -307,7 +308,7 @@ public class GraphicalModel {
 				int value = Integer.valueOf(args[1]);
 
 				Variable variable = variables.get(indexVariable);
-				variable.setEvidence(value);
+				variable.setEvidence(value); // setEvidence will intantiate factor
 			}
 		} catch (NumberFormatException e) {
 			// TODO Auto-generated catch block
@@ -375,7 +376,7 @@ public class GraphicalModel {
 	}
 
 	public static void main(String[] args) {
-		String fileName = "/home/leageon/GraphicalModel/hw2-problems/BN_4.uai";
+		String fileName = "./BN_4.uai";
 
 		GraphicalModel model = new GraphicalModel(fileName);
 		model.computeOrder();

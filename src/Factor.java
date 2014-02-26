@@ -4,6 +4,8 @@ public class Factor {
 	ArrayList<Variable> variables = null;
 	ArrayList<Double> table = null;
 
+	int index = -1;
+	
 	public int numColomns() {
 		return variables.get(variables.size() - 1).domainSize();
 	}
@@ -44,6 +46,7 @@ public class Factor {
 			variables.add(variable);
 		else
 			variables.set(index, variable);
+		variable.addMentionFactor(this);
 	}
 	
 	public void setGraph() {
@@ -122,5 +125,26 @@ public class Factor {
 		}
 		
 		return index;
+	}
+	
+	public void instantiateVariable(Variable var, int value) {
+		
+		int indexInFactor = -1;
+		// find the index in the factor.
+		for (int i = 0; i < variables.size(); i++) {
+			if(var == variables.get(i)) {
+				indexInFactor = i;
+				break;
+			}
+		}
+		
+		if(indexInFactor < 0)
+			return;
+		
+		for (int i = 0; i < table.size(); i++) {
+			int[] valuesArray = tableIndexToVaraibleValue(i);
+			if(valuesArray[indexInFactor] != value)
+				setTableValue(i, 0.0);
+		}
 	}
 }

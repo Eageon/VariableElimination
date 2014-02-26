@@ -29,24 +29,26 @@ public class Eliminator {
 		Collections.sort(variablesToEliminated, new OrderComparator());
 	}
 	
-	public Factor Sum_Product_VE() {
-		sortVaraiblesToElminatedByOrdering();
-		
-		for (int i = 0; i < variablesToEliminated.size(); i++) {
-			factors = Sum_Product_Eliminate_Var(variablesToEliminated.get(i));
-		}
-		
-		return Product(factors);
-	}
+// This is another strategy to implement elimination, I use bucket elimination instead
+//	public Factor Sum_Product_VE() {
+//		sortVaraiblesToElminatedByOrdering();
+//		
+//		for (int i = 0; i < variablesToEliminated.size(); i++) {
+//			factors = Sum_Product_Eliminate_Var(variablesToEliminated.get(i));
+//		}
+//		
+//		return Product(factors);
+//	}
 
 	private ArrayList<Factor> Sum_Product_Eliminate_Var(Variable var) {
-		ArrayList<Factor> factorPrime = new ArrayList<>();
 		
-		for(Factor factor : factors) {
-			if(factor.inScope(var)) {
-				factorPrime.add(factor);
-			}
-		}
+		LinkedList<Factor> factorPrime = var.factorMentionThis;
+		
+//		for(Factor factor : factors) {
+//			if(factor.inScope(var)) {
+//				factorPrime.add(factor);
+//			}
+//		}
 		
 		ArrayList<Factor> factorPrimePrime = new ArrayList<>();
 		
@@ -64,7 +66,7 @@ public class Eliminator {
 		return factorPrimePrime;
 	}
 	
-	private Factor Product(ArrayList<Factor> factorPrime) {
+	private Factor Product(LinkedList<Factor> factorPrime) {
 		LinkedList<Variable> set = new LinkedList<>();
 		
 		for(Factor factor : factorPrime) {
@@ -93,8 +95,9 @@ public class Eliminator {
 			//Factor zFactor = factorPrime.get(z);
 			int[] zValueIndex = fRet.tableIndexToVaraibleValue(z);
 			
-			for (int i = 0; i < factorPrime.size(); i++) {
-				Factor xFactor = factorPrime.get(i);
+			for(Factor xFactor : factorPrime) {
+			//for (int i = 0; i < factorPrime.size(); i++) {
+				//Factor xFactor = factorPrime.get(i);
 				int[] primeValues = new int[xFactor.numScopes()];
 				// find the same variable
 				for (int j = 0; j < primeValues.length; j++) {

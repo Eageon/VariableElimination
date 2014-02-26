@@ -9,9 +9,8 @@ public class Variable implements Comparable<Variable> {
 	
 	int index = -1;
 	
-	LinkedList<Variable> parents = new LinkedList<>();
-	LinkedList<Variable> children = new LinkedList<>();
 	LinkedList<Integer> neighbors = new LinkedList<>();
+	LinkedList<Factor> factorMentionThis = new LinkedList<>();
 	
 	public Variable(int domainSize) {
 		d = domainSize;
@@ -26,6 +25,11 @@ public class Variable implements Comparable<Variable> {
 	public void setEvidence(int observedValue) {
 		isEvdence = true;
 		value = observedValue;
+		
+		for(Factor f : factorMentionThis) {
+			// instantiate the variable mentions this variable
+			f.instantiateVariable(this, observedValue);
+		}
 	}
 	
 	public int degree() {
@@ -36,14 +40,6 @@ public class Variable implements Comparable<Variable> {
 	public int compareTo(Variable o) {
 		// TODO Auto-generated method stub
 		return this.degree() - o.degree();
-	}
-	
-	public void addParent(Variable par) {
-		parents.add(par);
-	}
-	
-	public void addChild(Variable child) {
-		children.add(child);
 	}
 	
 	public void addNeighbor(int neigh) {
@@ -69,5 +65,9 @@ public class Variable implements Comparable<Variable> {
 		}
 		
 		return false;
+	}
+	
+	public void addMentionFactor(Factor factor) {
+		factorMentionThis.add(factor);
 	}
 }
