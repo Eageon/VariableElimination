@@ -70,4 +70,20 @@ public class Variable implements Comparable<Variable> {
 	public void addMentionFactor(Factor factor) {
 		factorMentionThis.add(factor);
 	}
+	
+	public void removeMentionFactor(Factor factor) {
+		factorMentionThis.remove(factor);
+	}
+	
+	public LinkedList<Factor> getFactorsMentionThis() {
+//		ArrayList<Factor> mention = new ArrayList<>(factorMentionThis.size());
+//		
+//		for(Factor factor : factorMentionThis) {
+//			mention.add(factor);
+//		}
+//		
+//		return mention;
+		
+		return factorMentionThis;
+	}
 }

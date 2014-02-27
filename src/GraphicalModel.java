@@ -14,7 +14,9 @@ public class GraphicalModel {
 	ArrayList<Variable> variables;
 
 	LinkedList<Variable> orderVariables;
-	
+	LinkedList<Variable> evidenceVars;
+	Factor lastFactor;
+
 	String network;
 
 	public GraphicalModel(String fileName) {
@@ -52,7 +54,7 @@ public class GraphicalModel {
 	// @SuppressWarnings({ "null", "unused" })
 	private void buildMarkovNetwork(BufferedReader reader)
 			throws NumberFormatException, IOException {
-		
+
 		buildVariableAndFactorWithValue(reader);
 
 		// Then set CPT
@@ -97,15 +99,16 @@ public class GraphicalModel {
 			System.exit(-1);
 		}
 	}
-	
-	private void buildVariableAndFactorWithValue(BufferedReader reader) throws NumberFormatException, IOException {
+
+	private void buildVariableAndFactorWithValue(BufferedReader reader)
+			throws NumberFormatException, IOException {
 		int size = Integer.valueOf(reader.readLine());
 		numVariables = size;
 		variables = new ArrayList<>(size);
-		
+
 		String line3 = null;
-		while(null != (line3 = reader.readLine())) {
-			if(line3.length() > 1)
+		while (null != (line3 = reader.readLine())) {
+			if (line3.length() > 1)
 				break;
 		}
 		String[] domains = line3.split(" ");
@@ -141,15 +144,15 @@ public class GraphicalModel {
 				int indexVariable = Integer.valueOf(args[i]);
 				factor.setVariable(i - 1, this.getVariable(indexVariable));
 			}
-			
+
 			// set neighbors of variables
-			for(int i = 1; i < args.length; i++) {
+			for (int i = 1; i < args.length; i++) {
 				int iVar = Integer.valueOf(args[i]);
-				for(int j = 1; j < args.length; j++) {
+				for (int j = 1; j < args.length; j++) {
 					int jVar = Integer.valueOf(args[j]);
-					if(i == j)
+					if (i == j)
 						continue;
-					
+
 					variables.get(iVar).addNeighbor(variables.get(jVar));
 				}
 			}
@@ -163,9 +166,9 @@ public class GraphicalModel {
 
 	private void buildBayesianNetwork(BufferedReader reader)
 			throws NumberFormatException, IOException {
-		
+
 		buildVariableAndFactorWithValue(reader);
-		
+
 		// Then set CPT / Factor
 		int indexFactor = 0;
 		String head = null;
@@ -213,7 +216,7 @@ public class GraphicalModel {
 			}
 			// set graph is set neighbors of each variable
 			// it is done by buildVaraibleAndFactorValue
-			//factor.setGraph(); // very important
+			// factor.setGraph(); // very important
 		}
 
 		if (actualCount != factors.size()) {
@@ -323,7 +326,7 @@ public class GraphicalModel {
 
 		VariableHeap minHeap = new VariableHeap(variables);
 		minHeap.buildHeap();
-		minHeap.printHeap();
+		//minHeap.printHeap();
 
 		while (!minHeap.isEmpty()) {
 			Variable minDegreeVar = variables.get(minHeap.deleteMin());
@@ -337,7 +340,7 @@ public class GraphicalModel {
 					}
 
 					// not adjacent then add edge
-					v.addNeighbor(n);	
+					v.addNeighbor(n);
 				}
 				minHeap.adjustHeap(v.index, false);
 			}
@@ -351,8 +354,42 @@ public class GraphicalModel {
 		}
 	}
 
+	public void startElimination() {
+		LinkedList<Variable> evidenceVarsAfterElim = new LinkedList<>();
+
+		for (Variable var : orderVariables) {
+			if (var.isEvdence) {
+				evidenceVarsAfterElim.add(var);
+				//continue;
+			}
+
+			LinkedList<Factor> mentions = var.getFactorsMentionThis();
+			Factor newFactor = Eliminator.Product(mentions);
+			newFactor = Eliminator.SumOut(newFactor, var);
+
+			// remove mention factor from the list of mentions of all the
+			// variables
+			// that get envolved with this factor
+			for (int i = 0; i < mentions.size(); i++) {
+				Factor mentionFactor = mentions.get(i);
+				for (int j = 0; j < mentionFactor.numScopes(); j++) {
+					mentionFactor.getVariable(j).removeMentionFactor(mentionFactor);
+				}
+			}
+			
+			// add the new factor to the mention list of the all the variables 
+			// in the scope of new factor
+			for(Variable varScope : newFactor.variables) {
+				varScope.addMentionFactor(newFactor);
+			}
+			lastFactor = newFactor;
+		}
+		
+		this.evidenceVars = evidenceVarsAfterElim;
+	}
+
 	public static void main(String[] args) {
-		String fileName = "./grid3x3.uai";
+		String fileName = "./BN_6.uai";
 
 		try {
 			PrintStream writer = new PrintStream(fileName + ".output");
@@ -364,12 +401,21 @@ public class GraphicalModel {
 			model.computeOrder();
 			writer.println("Ordering computed");
 			writer.println("Order:");
-			for(Variable var : model.orderVariables) {
+			for (Variable var : model.orderVariables) {
 				writer.print(var.index + ", ");
 			}
 			writer.println("");
 			model.readEvidence(fileName + ".evid");
 			writer.println("Evidence loaded, and variables instantiation completed");
+			model.startElimination();
+			writer.println("Elimination completed");
+			if(model.network.equals("MARKOV")) {
+				for(double z : model.lastFactor.table)
+					writer.println("Z = " + z);
+			} else {
+				for(double z : model.lastFactor.table)
+					writer.println("The probability of evidence is " + z);
+			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

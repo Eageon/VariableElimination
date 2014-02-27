@@ -66,7 +66,7 @@ public class Eliminator {
 		return factorPrimePrime;
 	}
 	
-	public Factor Product(LinkedList<Factor> factorPrime) {
+	public static Factor Product(LinkedList<Factor> factorPrime) {
 		LinkedList<Variable> set = new LinkedList<>();
 		
 		for(Factor factor : factorPrime) {
@@ -129,7 +129,7 @@ public class Eliminator {
 	/*
 	 * Eliminate var in factor
 	 */
-	public Factor SumOut(Factor factor, Variable var) {
+	public static Factor SumOut(Factor factor, Variable var) {
 		
 		int numTmp = factor.table.size();
 		int num = 0;
@@ -137,7 +137,7 @@ public class Eliminator {
 		ArrayList<Variable> varsAfterElim = new ArrayList<>(factor.numScopes() - 1);
 		
 		for(int i = 0; i < factor.variables.size(); i++) {
-			Variable y = variables.get(i);
+			Variable y = factor.variables.get(i);
 			numTmp /= y.domainSize();
 			
 			if(y != var) {
@@ -241,9 +241,9 @@ public class Eliminator {
 		Factor newFactor = eliminator.Product(factorList);
 		
 //		eliminator.variables = variables;
-//		Factor newFactor = eliminator.SumOut(factor, B);
+		Factor newFactor2 = Eliminator.SumOut(factor, B);
 		System.out.println("");
 		System.out.println("New Factor");
-		newFactor.printFactor();
+		newFactor2.printFactor();
 	}
 }
