@@ -144,7 +144,7 @@ public class Factor {
 		int multi = 1;
 		int index = 0;
 		
-		for (int i = values.length - 1; i >= 0; i++) {
+		for (int i = values.length - 1; i >= 0; i--) {
 			index += values[i] * multi;
 			multi *= variables.get(i).domainSize();
 		}
@@ -176,7 +176,8 @@ public class Factor {
 	public void printFactor() {
 		for (int i = 0; i < table.size(); i++) {
 			int[] varsIndex = tableIndexToVaraibleValue(i);
-			System.out.print(varsIndex);
+			for(int index : varsIndex)
+				System.out.print(index + " ");
 			System.out.println("\t\t" + table.get(i));
 		}
 	}

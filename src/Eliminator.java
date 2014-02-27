@@ -200,14 +200,23 @@ public class Eliminator {
 		Variable A = new Variable(2);
 		Variable B = new Variable(3);
 		Variable C = new Variable(2);
+		Variable D = new Variable(2);
 		
 		ArrayList<Variable> variables = new ArrayList<>();
 		variables.add(A);
 		variables.add(B);
 		variables.add(C);
 		
+		ArrayList<Variable> variables2 = new ArrayList<>();
+		//variables2.add(B);
+		variables2.add(C);
+		variables2.add(D);
+		
 		Factor factor = new Factor(variables);
 		factor.initTable();
+		
+		Factor factor2 = new Factor(variables2);
+		factor2.initTable();
 		
 		Random rand = new Random();
 		
@@ -215,10 +224,24 @@ public class Eliminator {
 			factor.setTableValue(i, 10 * rand.nextDouble());
 		}
 		
-		factor.printFactor();
+		for (int i = 0; i < factor2.table.size(); i++) {
+			factor2.setTableValue(i, 10 * rand.nextDouble());
+		}
 		
-		eliminator.variables = variables;
-		Factor newFactor = eliminator.SumOut(factor, B);
+		System.out.println("Factor");
+		factor.printFactor();
+		System.out.println("");
+		System.out.println("Factor 2");
+		factor2.printFactor();
+		
+		LinkedList<Factor> factorList = new LinkedList<>();
+		factorList.add(factor);
+		factorList.add(factor2);
+		
+		Factor newFactor = eliminator.Product(factorList);
+		
+//		eliminator.variables = variables;
+//		Factor newFactor = eliminator.SumOut(factor, B);
 		System.out.println("");
 		System.out.println("New Factor");
 		newFactor.printFactor();
