@@ -24,12 +24,37 @@ public class Factor {
 	public Factor(ArrayList<Variable> vars) {
 		variables = vars;
 	}
+	
+	public void initTable() {
+		if(null == variables)
+			return;
+		
+		int numCells = 1;
+		for(Variable var : variables) {
+			numCells *= var.domainSize();
+		}
+		
+		initTable(numCells);
+	}
+	
+	public void tableZeros() {
+		if(null == table)
+			return;
+		
+		for (int i = 0; i < table.size(); i++) {
+			table.set(i, 0.0);
+		}
+	}
 
 	public void initTable(int num) {
 		if (0 > num)
 			return;
 
 		table = new ArrayList<>(num);
+		
+		for (int i = 0; i < num; i++) {
+			setTableValue(i, 0.0);
+		}
 	}
 
 	public Variable getVariable(int index) {
@@ -93,7 +118,7 @@ public class Factor {
 	/**
 	 * 
 	 * @param index of table
-	 * @return the set of the values of correspanding variables
+	 * @return the set of the values of correspending variables
 	 */
 	public int[] tableIndexToVaraibleValue(int index) {
 		int[] values = new int[variables.size()];
@@ -113,7 +138,7 @@ public class Factor {
 	/**
 	 * do reversely with tableIndexToVaraibleValue
 	 * @param values the indices of values of variables
-	 * @return
+	 * @return the index of table
 	 */
 	public int variableValueToTableIndex(int[] values) {
 		int multi = 1;
@@ -145,6 +170,14 @@ public class Factor {
 			int[] valuesArray = tableIndexToVaraibleValue(i);
 			if(valuesArray[indexInFactor] != value)
 				setTableValue(i, 0.0);
+		}
+	}
+	
+	public void printFactor() {
+		for (int i = 0; i < table.size(); i++) {
+			int[] varsIndex = tableIndexToVaraibleValue(i);
+			System.out.print(varsIndex);
+			System.out.println("\t\t" + table.get(i));
 		}
 	}
 }

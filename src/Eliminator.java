@@ -66,7 +66,7 @@ public class Eliminator {
 		return factorPrimePrime;
 	}
 	
-	private Factor Product(LinkedList<Factor> factorPrime) {
+	public Factor Product(LinkedList<Factor> factorPrime) {
 		LinkedList<Variable> set = new LinkedList<>();
 		
 		for(Factor factor : factorPrime) {
@@ -126,8 +126,101 @@ public class Eliminator {
 		return 0.0;
 	}
 	
-	private Factor SumOut(Factor bigFi, Variable var) {
+	/*
+	 * Eliminate var in factor
+	 */
+	public Factor SumOut(Factor factor, Variable var) {
 		
-		return null;
+		int numTmp = factor.table.size();
+		int num = 0;
+		
+		ArrayList<Variable> varsAfterElim = new ArrayList<>(factor.numScopes() - 1);
+		
+		for(int i = 0; i < factor.variables.size(); i++) {
+			Variable y = variables.get(i);
+			numTmp /= y.domainSize();
+			
+			if(y != var) {
+				varsAfterElim.add(y);
+			} else {
+				num = numTmp;
+			}
+		}
+		
+		Factor fRet = new Factor(varsAfterElim);
+		fRet.initTable();
+		//fRet.tableZeros();
+		
+		
+//		for(int i = 0; i < fRet.table.size() / num; i++) {
+//			int base = i * num;
+//			for (int j = 0; j < var.domainSize(); j++) {
+//				
+//			}
+//			
+//			double value = 0.0;
+//			for (int k = 0; k < var.domainSize(); k++) {
+//				value += factor.getTabelValue(i * num + k * num / var.domainSize());
+//			}
+//			
+//			fRet.setTableValue(i, value);
+//		}
+		
+		int i = 0;
+		int count = 0;
+		for(int base = 0; base < factor.table.size() 
+				&& (base + num * (var.domainSize() - 1)) < factor.table.size()
+					;) {
+			
+			double value = 0.0;
+			for(int k = 0; k < var.domainSize(); k++) {
+				value += factor.getTabelValue(base + k * num);
+			}
+			
+			fRet.setTableValue(i, value);
+			
+			i++;
+			count++;
+			base++;
+			if(count == (num)) {
+				base += num;
+				count = 0;
+			}
+//			else {
+//				base++;
+//			}
+		}
+		
+		return fRet;
+	}
+	
+	public static void main(String[] args) {
+		Eliminator eliminator = new Eliminator();
+		
+		Variable A = new Variable(2);
+		Variable B = new Variable(3);
+		Variable C = new Variable(2);
+		
+		ArrayList<Variable> variables = new ArrayList<>();
+		variables.add(A);
+		variables.add(B);
+		variables.add(C);
+		
+		Factor factor = new Factor(variables);
+		factor.initTable();
+		
+		Random rand = new Random();
+		
+		for (int i = 0; i < factor.table.size(); i++) {
+			factor.setTableValue(i, 10 * rand.nextDouble());
+		}
+		
+		factor.printFactor();
+		
+		eliminator.variables = variables;
+		Factor newFactor = eliminator.SumOut(factor, B);
+		System.out.println("");
+		System.out.println("New Factor");
+		newFactor.printFactor();
 	}
 }
