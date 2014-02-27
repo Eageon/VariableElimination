@@ -68,7 +68,8 @@ public class Variable implements Comparable<Variable> {
 	}
 	
 	public void addMentionFactor(Factor factor) {
-		factorMentionThis.add(factor);
+		if(!factorMentionThis.contains(factor))
+			factorMentionThis.add(factor);
 	}
 	
 	public void removeMentionFactor(Factor factor) {

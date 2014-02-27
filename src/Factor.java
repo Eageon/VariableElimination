@@ -166,11 +166,25 @@ public class Factor {
 		if(indexInFactor < 0)
 			return;
 		
+		reduceFactor(indexInFactor, value);
+	}
+	
+	private void reduceFactor(int index, int value) {
+		ArrayList<Double> newTable = new ArrayList<>(table.size() / variables.get(index).domainSize());
+		
+		int j = 0;
 		for (int i = 0; i < table.size(); i++) {
 			int[] valuesArray = tableIndexToVaraibleValue(i);
-			if(valuesArray[indexInFactor] != value)
-				setTableValue(i, 0.0);
+			if(valuesArray[index] == value) {
+				newTable.set(i, table.get(index));
+				i++;
+			}
 		}
+		
+		table.clear();
+		table = newTable;
+		variables.get(index).removeMentionFactor(this);
+		variables.remove(index);
 	}
 	
 	public void printFactor() {

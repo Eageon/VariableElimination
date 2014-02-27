@@ -363,15 +363,18 @@ public class GraphicalModel {
 				//continue;
 			}
 
+			
 			LinkedList<Factor> mentions = var.getFactorsMentionThis();
 			Factor newFactor = Eliminator.Product(mentions);
 			newFactor = Eliminator.SumOut(newFactor, var);
+			
+			LinkedList<Factor> mentionsCopy = new LinkedList<>(mentions);
 
 			// remove mention factor from the list of mentions of all the
 			// variables
 			// that get envolved with this factor
-			for (int i = 0; i < mentions.size(); i++) {
-				Factor mentionFactor = mentions.get(i);
+			for (int i = 0; i < mentionsCopy.size(); i++) {
+				Factor mentionFactor = mentionsCopy.get(i);
 				for (int j = 0; j < mentionFactor.numScopes(); j++) {
 					mentionFactor.getVariable(j).removeMentionFactor(mentionFactor);
 				}
@@ -387,9 +390,17 @@ public class GraphicalModel {
 		
 		this.evidenceVars = evidenceVarsAfterElim;
 	}
+	
+	public static void usage() {
+		System.out.println("java  GraphicalModel " + "FILENAME");
+	}
 
 	public static void main(String[] args) {
-		String fileName = "./BN_6.uai";
+		if(1 != args.length) {
+			usage();
+		}
+		
+		String fileName = args[0];
 
 		try {
 			PrintStream writer = new PrintStream(fileName + ".output");

@@ -44,12 +44,6 @@ public class Eliminator {
 		
 		LinkedList<Factor> factorPrime = var.factorMentionThis;
 		
-//		for(Factor factor : factors) {
-//			if(factor.inScope(var)) {
-//				factorPrime.add(factor);
-//			}
-//		}
-		
 		ArrayList<Factor> factorPrimePrime = new ArrayList<>();
 		
 		for(Factor factor : factors) {
@@ -84,7 +78,7 @@ public class Eliminator {
 		}
 		
 		Factor fRet = new Factor(Z);
-		fRet.initTable(numTables);
+		fRet.initTable();
 		for (int i = 0; i < fRet.table.size(); i++) {
 			fRet.table.set(i, 1.0);
 		}
@@ -114,6 +108,8 @@ public class Eliminator {
 				fRet.table.set(z, fRet.table.get(z) * xFactor.table.get(xTableIndex));
 			}
 		}
+		
+		System.gc();
 		
 		return fRet;
 	}
@@ -151,20 +147,6 @@ public class Eliminator {
 		fRet.initTable();
 		//fRet.tableZeros();
 		
-		
-//		for(int i = 0; i < fRet.table.size() / num; i++) {
-//			int base = i * num;
-//			for (int j = 0; j < var.domainSize(); j++) {
-//				
-//			}
-//			
-//			double value = 0.0;
-//			for (int k = 0; k < var.domainSize(); k++) {
-//				value += factor.getTabelValue(i * num + k * num / var.domainSize());
-//			}
-//			
-//			fRet.setTableValue(i, value);
-//		}
 		
 		int i = 0;
 		int count = 0;
