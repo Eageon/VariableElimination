@@ -130,7 +130,7 @@ public class Eliminator {
 		int numTmp = factor.table.size();
 		int num = 0;
 		
-		ArrayList<Variable> varsAfterElim = new ArrayList<>(factor.numScopes() - 1);
+		ArrayList<Variable> varsAfterElim = new ArrayList<>(factor.numScopes());
 		
 		for(int i = 0; i < factor.variables.size(); i++) {
 			Variable y = factor.variables.get(i);

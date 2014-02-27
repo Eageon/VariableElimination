@@ -26,7 +26,9 @@ public class Variable implements Comparable<Variable> {
 		isEvdence = true;
 		value = observedValue;
 		
-		for(Factor f : factorMentionThis) {
+		
+		LinkedList<Factor> factorMentionThisCopy = new LinkedList<>(factorMentionThis);
+		for(Factor f : factorMentionThisCopy) {
 			// instantiate the variable mentions this variable
 			f.instantiateVariable(this, observedValue);
 		}

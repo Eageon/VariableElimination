@@ -176,8 +176,8 @@ public class Factor {
 		for (int i = 0; i < table.size(); i++) {
 			int[] valuesArray = tableIndexToVaraibleValue(i);
 			if(valuesArray[index] == value) {
-				newTable.set(i, table.get(index));
-				i++;
+				newTable.add(table.get(i));
+				j++;
 			}
 		}
 		
