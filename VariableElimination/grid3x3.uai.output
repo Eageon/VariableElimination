@@ -1,0 +1,10 @@
+Network data loading completed: 9 variables, 21 factors
+MARKOV network
+Ordering computed
+Order:
+0, 8, 2, 6, 1, 7, 4, 5, 3, 
+Evidence loaded, and variables instantiation completed. 0 evidence
+Elimination completed
+
+====================RESULT========================
+Z = 6.720702354986677E22
