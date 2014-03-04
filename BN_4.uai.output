@@ -3,6 +3,9 @@ BAYES network
 Ordering computed
 Order:
 43, 49, 30, 37, 29, 44, 36, 39, 41, 42, 45, 47, 48, 32, 33, 46, 35, 28, 31, 40, 38, 26, 34, 27, 25, 8, 1, 2, 23, 20, 4, 0, 22, 17, 24, 9, 6, 13, 12, 5, 10, 15, 14, 3, 11, 21, 19, 18, 16, 7, 
-Evidence loaded, and variables instantiation completed
+Evidence loaded, and variables instantiation completed. 10 evidence
 Elimination completed
-The probability of evidence is 0.1579102560304323
+
+====================RESULT========================
+The probability of evidence = 0.018478166557537996
+

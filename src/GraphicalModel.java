@@ -5,6 +5,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.LinkedList;
 
 public class GraphicalModel {
@@ -12,10 +13,14 @@ public class GraphicalModel {
 	ArrayList<Factor> factors;
 
 	ArrayList<Variable> variables;
+	LinkedList<Factor> remainFactors;
 
 	LinkedList<Variable> orderVariables;
 	LinkedList<Variable> evidenceVars;
+	int evidenceCount = 0;
 	Factor lastFactor;
+
+	double result = 1.0;
 
 	String network;
 
@@ -315,7 +320,10 @@ public class GraphicalModel {
 		if (actualEvidence != numEvidence) {
 			System.out
 					.println("Format error: actual evidence less than indication");
+			System.exit(-1);
 		}
+
+		evidenceCount = actualEvidence;
 	}
 
 	/**
@@ -326,7 +334,7 @@ public class GraphicalModel {
 
 		VariableHeap minHeap = new VariableHeap(variables);
 		minHeap.buildHeap();
-		//minHeap.printHeap();
+		// minHeap.printHeap();
 
 		while (!minHeap.isEmpty()) {
 			Variable minDegreeVar = variables.get(minHeap.deleteMin());
@@ -355,19 +363,18 @@ public class GraphicalModel {
 	}
 
 	public void startElimination() {
-		LinkedList<Variable> evidenceVarsAfterElim = new LinkedList<>();
+		remainFactors = new LinkedList<>(factors);
 
 		for (Variable var : orderVariables) {
-			if (var.isEvdence) {
-				evidenceVarsAfterElim.add(var);
-				//continue;
-			}
+			// if (var.isEvdence) {
+			// remainFactors.add(var);
+			// //continue;
+			// }
 
-			
 			LinkedList<Factor> mentions = var.getFactorsMentionThis();
 			Factor newFactor = Eliminator.Product(mentions);
 			newFactor = Eliminator.SumOut(newFactor, var);
-			
+
 			LinkedList<Factor> mentionsCopy = new LinkedList<>(mentions);
 
 			// remove mention factor from the list of mentions of all the
@@ -375,31 +382,50 @@ public class GraphicalModel {
 			// that get envolved with this factor
 			for (int i = 0; i < mentionsCopy.size(); i++) {
 				Factor mentionFactor = mentionsCopy.get(i);
+				remainFactors.remove(mentionFactor);
+
 				for (int j = 0; j < mentionFactor.numScopes(); j++) {
-					mentionFactor.getVariable(j).removeMentionFactor(mentionFactor);
+					mentionFactor.getVariable(j).removeMentionFactor(
+							mentionFactor);
 				}
 			}
-			
-			// add the new factor to the mention list of the all the variables 
+
+			// add the new factor to the mention list of the all the variables
 			// in the scope of new factor
-			for(Variable varScope : newFactor.variables) {
+			for (Variable varScope : newFactor.variables) {
 				varScope.addMentionFactor(newFactor);
 			}
 			lastFactor = newFactor;
+			remainFactors.add(newFactor);
 		}
-		
-		this.evidenceVars = evidenceVarsAfterElim;
+
+		// this.evidenceVars = evidenceVarsAfterElim;
+		Iterator<Factor> iter = remainFactors.iterator();
+		while (iter.hasNext()) {
+			Factor factor = iter.next();
+			if (!(factor.table.get(0) < 1.0) || !(factor.table.get(0) > 0.0)) {
+				iter.remove();
+			}
+		}
+
+		finalize();
 	}
-	
+
+	public void finalize() {
+		for (Factor factor : remainFactors) {
+			result *= factor.table.get(0);
+		}
+	}
+
 	public static void usage() {
 		System.out.println("java  GraphicalModel " + "FILENAME");
 	}
 
 	public static void main(String[] args) {
-		if(1 != args.length) {
+		if (1 != args.length) {
 			usage();
 		}
-		
+
 		String fileName = args[0];
 
 		try {
@@ -417,19 +443,25 @@ public class GraphicalModel {
 			}
 			writer.println("");
 			model.readEvidence(fileName + ".evid");
-			writer.println("Evidence loaded, and variables instantiation completed");
+			writer.println("Evidence loaded, and variables instantiation completed. "
+					+ model.evidenceCount + " evidence");
 			model.startElimination();
 			writer.println("Elimination completed");
-			if(model.network.equals("MARKOV")) {
-				for(double z : model.lastFactor.table)
+			writer.println("");
+			writer.println("====================RESULT========================");
+			if (model.network.equals("MARKOV")) {
+				for (double z : model.lastFactor.table)
 					writer.println("Z = " + z);
 			} else {
-				for(double z : model.lastFactor.table)
-					writer.println("The probability of evidence is " + z);
+
+				writer.println("The probability of evidence = " + model.result);
+				writer.println("");
+
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		System.out.println("Succeed!");
+		System.out.println("Output file is " + fileName + ".output");
 	}
 }
