@@ -1,7 +1,3 @@
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.LinkedList;
 import java.util.*;
 
 
@@ -25,6 +21,7 @@ public class Eliminator {
 	
 	
 	
+	@SuppressWarnings("unused")
 	private void sortVaraiblesToElminatedByOrdering() {
 		Collections.sort(variablesToEliminated, new OrderComparator());
 	}
@@ -40,6 +37,7 @@ public class Eliminator {
 //		return Product(factors);
 //	}
 
+	@SuppressWarnings("unused")
 	private ArrayList<Factor> Sum_Product_Eliminate_Var(Variable var) {
 		
 		LinkedList<Factor> factorPrime = var.factorMentionThis;
@@ -71,6 +69,7 @@ public class Eliminator {
 		}
 		
 		ArrayList<Variable> Z = new ArrayList<>(set.size());
+		@SuppressWarnings("unused")
 		int numTables = 1;
 		for(Variable var : set) {
 			Z.add(var);
@@ -112,14 +111,6 @@ public class Eliminator {
 		System.gc();
 		
 		return fRet;
-	}
-	
-	private double xConsistentWithZ(ArrayList<Factor> z, int[] zValueIndex) {
-		for (int i = 0; i < zValueIndex.length; i++) {
-			
-		}
-		
-		return 0.0;
 	}
 	
 	/*
@@ -177,6 +168,7 @@ public class Eliminator {
 	}
 	
 	public static void main(String[] args) {
+		@SuppressWarnings("unused")
 		Eliminator eliminator = new Eliminator();
 		
 		Variable A = new Variable(2);
@@ -220,7 +212,7 @@ public class Eliminator {
 		factorList.add(factor);
 		factorList.add(factor2);
 		
-		Factor newFactor = eliminator.Product(factorList);
+		//Factor newFactor = eliminator.Product(factorList);
 		
 //		eliminator.variables = variables;
 		Factor newFactor2 = Eliminator.SumOut(factor, B);

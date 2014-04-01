@@ -1,4 +1,3 @@
-import java.util.ArrayList;
 import java.util.LinkedList;
 
 
@@ -28,9 +27,10 @@ public class Variable implements Comparable<Variable> {
 		
 		
 		LinkedList<Factor> factorMentionThisCopy = new LinkedList<>(factorMentionThis);
-		for(Factor f : factorMentionThisCopy) {
+		for(Factor factor : factorMentionThisCopy) {
 			// instantiate the variable mentions this variable
-			f.instantiateVariable(this, observedValue);
+			factor.instantiateVariable(this, observedValue);
+			this.removeMentionFactor(factor);
 		}
 	}
 	

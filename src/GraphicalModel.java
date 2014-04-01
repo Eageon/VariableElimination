@@ -1,7 +1,6 @@
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
@@ -76,6 +75,7 @@ public class GraphicalModel {
 			Factor factor = factors.get(indexFactor++);
 			factor.initTable(numCells);
 
+			@SuppressWarnings("unused")
 			int numLinesToRead = numCells / factor.numColomns();
 			String tableRow = null;
 
@@ -138,6 +138,7 @@ public class GraphicalModel {
 			String[] args = factorLine.split("\t| ");
 			if (2 > args.length)
 				continue;
+			@SuppressWarnings("unused")
 			int indexLastVariable = Integer.valueOf(args[args.length - 1]);
 			int numScopes = Integer.valueOf(args[0]);
 			// variables.get(indexLastVariable).domainSize();
@@ -400,6 +401,12 @@ public class GraphicalModel {
 		}
 
 		// this.evidenceVars = evidenceVarsAfterElim;
+		//prune();
+		finalize();
+	}
+	
+	@SuppressWarnings("unused")
+	private void prune() {
 		Iterator<Factor> iter = remainFactors.iterator();
 		while (iter.hasNext()) {
 			Factor factor = iter.next();
@@ -407,13 +414,19 @@ public class GraphicalModel {
 				iter.remove();
 			}
 		}
-
-		finalize();
 	}
 
 	public void finalize() {
 		for (Factor factor : remainFactors) {
-			result *= factor.table.get(0);
+			for (Variable var : factor.variables) {
+				System.out.println(var + " ");
+			}
+			System.out.println("");
+			for (Double var : factor.table) {
+				System.out.print(var + " ");
+			}
+			System.out.println("");
+			//result *= factor.table.get(0);
 		}
 	}
 
@@ -458,10 +471,12 @@ public class GraphicalModel {
 				writer.println("");
 
 			}
+			writer.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		System.out.println("Succeed!");
 		System.out.println("Output file is " + fileName + ".output");
+		
 	}
 }
