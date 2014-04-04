@@ -201,8 +201,6 @@ public class Factor {
 		table.clear();
 		table = newTable;
 		
-		
-		//variables.get(index).removeMentionFactor(this);
 		variables.remove(index);
 
 //		if(doPrint) {

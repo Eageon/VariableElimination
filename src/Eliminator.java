@@ -2,6 +2,9 @@ import java.util.*;
 
 
 public class Eliminator {
+	
+	static int factorCount = 0;
+	
 	ArrayList<Variable> variablesToEliminated;
 	
 	ArrayList<Factor> factors; // refer to factors
@@ -58,6 +61,10 @@ public class Eliminator {
 		return factorPrimePrime;
 	}
 	
+	public static void setFactorCount(int count) {
+		factorCount = count;
+	}
+	
 	public static Factor Product(LinkedList<Factor> factorPrime) {
 		LinkedList<Variable> set = new LinkedList<>();
 		
@@ -105,10 +112,20 @@ public class Eliminator {
 				int xTableIndex = xFactor.variableValueToTableIndex(primeValues);
 				// the multiply two double;
 				fRet.table.set(z, fRet.table.get(z) * xFactor.table.get(xTableIndex));
+				
 			}
 		}
 		
 		System.gc();
+		
+		if(fRet.numScopes() == 0) {
+			System.out.println(fRet.index + " 0");
+			for (Factor factor : factorPrime) {
+				System.out.print(factor.index + " ");
+			}
+			System.out.println("");
+			System.exit(-1);
+		}
 		
 		return fRet;
 	}
@@ -151,6 +168,11 @@ public class Eliminator {
 			}
 			
 			fRet.setTableValue(i, value);
+			if(fRet.table.get(i) == 2.0) {
+				System.out.println("var = " + var.index + ", domain = " + var.domainSize() + ", table0 = " + factor.getTabelValue(0) + 
+						", num = " + num + ", base = " + base + 
+						", i = " + i + ", " + "value = " + value);
+			}
 			
 			i++;
 			count++;
@@ -164,6 +186,8 @@ public class Eliminator {
 //			}
 		}
 		
+		fRet.index = factorCount;
+		factorCount++;
 		return fRet;
 	}
 	

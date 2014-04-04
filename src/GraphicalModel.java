@@ -339,6 +339,7 @@ public class GraphicalModel {
 
 		while (!minHeap.isEmpty()) {
 			Variable minDegreeVar = variables.get(minHeap.deleteMin());
+			//if(minDegreeVar.isEvdence = false)
 			orderVariables.add(minDegreeVar);
 
 			// add edge to non-adjacent neighbor variables
@@ -362,20 +363,28 @@ public class GraphicalModel {
 			minDegreeVar.neighbors.clear();
 		}
 	}
+	
+	public ArrayList<ArrayList<Factor>> generateClusters() {
+		
+		
+		return null;
+	}
 
 	public void startElimination() {
+		//validateFactors();
+		
 		remainFactors = new LinkedList<>(factors);
+		Eliminator.setFactorCount(factors.size());
 
 		for (Variable var : orderVariables) {
-			// if (var.isEvdence) {
-			// remainFactors.add(var);
-			// //continue;
-			// }
-
+			
 			LinkedList<Factor> mentions = var.getFactorsMentionThis();
+			if(mentions.size() == 0) {
+				continue;
+			}
 			Factor newFactor = Eliminator.Product(mentions);
 			newFactor = Eliminator.SumOut(newFactor, var);
-
+			
 			LinkedList<Factor> mentionsCopy = new LinkedList<>(mentions);
 
 			// remove mention factor from the list of mentions of all the
@@ -394,10 +403,14 @@ public class GraphicalModel {
 			// add the new factor to the mention list of the all the variables
 			// in the scope of new factor
 			for (Variable varScope : newFactor.variables) {
+				if(var == varScope) {
+					continue;
+				}
 				varScope.addMentionFactor(newFactor);
 			}
 			lastFactor = newFactor;
 			remainFactors.add(newFactor);
+			//validateRemainFactors();
 		}
 
 		// this.evidenceVars = evidenceVarsAfterElim;
@@ -415,18 +428,59 @@ public class GraphicalModel {
 			}
 		}
 	}
+	
+	private void validateFactors() {
+		Iterator<Factor> iter = factors.iterator();
+		
+		while(iter.hasNext()) {
+			Factor factor = iter.next();
+			if(0 == factor.numScopes()) {
+				for (Double var : factor.table) {
+					System.out.print(var + " ");
+					result *= var;
+				}
+				System.out.println("");
+				
+				iter.remove();
+			}
+		}
+		
+		System.out.println("End of validation");
+	}
+	
+	private void validateRemainFactors() {
+		Iterator<Factor> iter = remainFactors.iterator();
+		
+		while(iter.hasNext()) {
+			Factor factor = iter.next();
+			if(0 == factor.numScopes()) {
+				for (Double var : factor.table) {
+					System.out.print(var + " ");
+					result *= var;
+				}
+				System.out.println("");
+				
+				iter.remove();
+			}
+		}
+		
+		System.out.println("End of remain validation");
+	}
 
 	public void finalize() {
 		for (Factor factor : remainFactors) {
-			for (Variable var : factor.variables) {
-				System.out.println(var + " ");
-			}
-			System.out.println("");
-			for (Double var : factor.table) {
-				System.out.print(var + " ");
-			}
-			System.out.println("");
-			//result *= factor.table.get(0);
+//			System.out.println("Factor " + factor.index);
+//			for (Variable var : factor.variables) {
+//				System.out.print(var.index + " ");
+//			}
+//			System.out.println("");
+//			System.out.println("End variables");
+//			for (Double var : factor.table) {
+//				System.out.print(var + " ");
+//			}
+//			System.out.println("");
+//			System.out.println("End table");
+			result *= factor.table.get(0);
 		}
 	}
 
