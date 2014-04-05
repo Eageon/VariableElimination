@@ -335,17 +335,26 @@ public class GraphicalModel {
 	public void computeOrder() {
 		orderVariables = new LinkedList<>();
 
-		VariableHeap minHeap = new VariableHeap(variables);
+		ArrayList<Variable> varToBeAddToHeap = new ArrayList<>(variables.size() - evidenceCount);
+		
+		int count = 0;
+		for (Variable variable : variables) {
+			if(false == variable.isEvdence) {
+				variable.index = count++; // relabel the index of variable
+				varToBeAddToHeap.add(variable);
+			}
+		}
+		
+		VariableHeap minHeap = new VariableHeap(varToBeAddToHeap);
 		minHeap.buildHeap();
 		// minHeap.printHeap();
 
 		while (!minHeap.isEmpty()) {
-			Variable minDegreeVar = variables.get(minHeap.deleteMin());
-			if(minDegreeVar.isEvdence = true) {
-				continue;
+			Variable minDegreeVar = varToBeAddToHeap.get(minHeap.deleteMin());
+			if(false == minDegreeVar.isEvdence) {
+				orderVariables.add(minDegreeVar);
 			}
-			orderVariables.add(minDegreeVar);
-
+			
 			// add edge to non-adjacent neighbor variables
 			for (Variable v : minDegreeVar.neighbors) {
 				for (Variable n : minDegreeVar.neighbors) {
@@ -403,7 +412,7 @@ public class GraphicalModel {
 	}
 
 	public void startElimination() {
-		//validateFactors();
+		validateFactors();
 		
 		//remainFactors = new LinkedList<>(factors);
 		Eliminator.setFactorCount(factors.size());
@@ -419,11 +428,11 @@ public class GraphicalModel {
 			Factor newFactor = Eliminator.Product(mentions);
 			newFactor = Eliminator.SumOut(newFactor, var);
 			
-			/*if(0 == newFactor.numScopes()) {
+			if(0 == newFactor.numScopes()) {
 				result *= newFactor.getTabelValue(0);
 				emptyFactorCount++;
-				break;
-			}*/
+				continue;
+			}
 			
 			boolean putInNewBucket = false;
 			Iterator<Variable> carryVariable = orderVariables.iterator();
@@ -467,13 +476,16 @@ public class GraphicalModel {
 			
 			
 			lastFactor = newFactor;
+			if(null == lastFactor) {
+				System.out.println();
+			}
 			//remainFactors.add(newFactor);
 			//validateRemainFactors();
 		}
 
 		// this.evidenceVars = evidenceVarsAfterElim;
 		//prune();
-		finalize();
+		//finalize();
 	}
 	
 	@SuppressWarnings("unused")
@@ -494,10 +506,10 @@ public class GraphicalModel {
 			Factor factor = iter.next();
 			if(0 == factor.numScopes()) {
 				for (Double var : factor.table) {
-					System.out.print(var + " ");
+					//System.out.print(var + " ");
 					result *= var;
 				}
-				System.out.println("");
+				//System.out.println("");
 				
 				iter.remove();
 			}
@@ -563,6 +575,9 @@ public class GraphicalModel {
 					+ model.variables.size() + " variables, "
 					+ model.factors.size() + " factors");
 			writer.println(model.network + " network");
+			model.readEvidence(fileName + ".evid");
+			writer.println("Evidence loaded, and variables instantiation completed. "
+					+ model.evidenceCount + " evidence");
 			model.computeOrder();
 			writer.println("Ordering computed");
 			writer.println("Order:");
@@ -570,9 +585,7 @@ public class GraphicalModel {
 				writer.print(var.index + ", ");
 			}
 			writer.println("");
-			model.readEvidence(fileName + ".evid");
-			writer.println("Evidence loaded, and variables instantiation completed. "
-					+ model.evidenceCount + " evidence");
+	
 			model.generateClusters();
 			model.startElimination();
 			writer.println("Elimination completed");

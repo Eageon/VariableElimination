@@ -168,11 +168,11 @@ public class Eliminator {
 			}
 			
 			fRet.setTableValue(i, value);
-			/*if(fRet.table.get(i) == 2.0) {
+			if(fRet.table.get(i) == 2.0) {
 				System.out.println("var = " + var.index + ", domain = " + var.domainSize() + ", table0 = " + factor.getTabelValue(0) + 
 						", num = " + num + ", base = " + base + 
 						", i = " + i + ", " + "value = " + value);
-			}*/
+			}
 			
 			i++;
 			count++;

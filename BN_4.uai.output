@@ -1,5 +1,11 @@
 Network data loading completed: 50 variables, 50 factors
 BAYES network
+Evidence loaded, and variables instantiation completed. 10 evidence
 Ordering computed
 Order:
+34, 39, 23, 32, 37, 28, 33, 35, 36, 22, 27, 26, 30, 38, 25, 21, 19, 29, 31, 24, 18, 20, 16, 9, 2, 3, 17, 11, 15, 13, 6, 4, 10, 7, 8, 12, 0, 1, 5, 14, 
+Elimination completed
+
+====================RESULT========================
+The probability of evidence = 0.1579102560304323
 

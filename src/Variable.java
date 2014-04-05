@@ -3,7 +3,7 @@ import java.util.LinkedList;
 
 public class Variable implements Comparable<Variable> {
 	int d;
-	boolean isEvdence;
+	boolean isEvdence = false;
 	int value;
 	
 	int index = -1;
@@ -33,11 +33,11 @@ public class Variable implements Comparable<Variable> {
 		}
 		
 		factorMentionThis.clear();
-		/*for (Variable var : neighbors) {
+		for (Variable var : neighbors) {
 			if(var != this) {
 				var.removeNeighbor(this);
 			}
-		}*/
+		}
 		neighbors.clear();
 	}
 	
