@@ -15,11 +15,13 @@ public class GraphicalModel {
 	LinkedList<Factor> remainFactors;
 
 	LinkedList<Variable> orderVariables;
+	LinkedList<ArrayList<Factor>> clusters;
 	LinkedList<Variable> evidenceVars;
 	int evidenceCount = 0;
 	Factor lastFactor;
 
 	double result = 1.0;
+	int emptyFactorCount = 0;
 
 	String network;
 
@@ -339,7 +341,9 @@ public class GraphicalModel {
 
 		while (!minHeap.isEmpty()) {
 			Variable minDegreeVar = variables.get(minHeap.deleteMin());
-			//if(minDegreeVar.isEvdence = false)
+			if(minDegreeVar.isEvdence = true) {
+				continue;
+			}
 			orderVariables.add(minDegreeVar);
 
 			// add edge to non-adjacent neighbor variables
@@ -364,33 +368,85 @@ public class GraphicalModel {
 		}
 	}
 	
-	public ArrayList<ArrayList<Factor>> generateClusters() {
+	public LinkedList<ArrayList<Factor>> generateClusters() {
+		remainFactors = new LinkedList<>(factors);
+		Eliminator.setFactorCount(factors.size());
 		
+		clusters = new LinkedList<ArrayList<Factor>>();
 		
-		return null;
+		for (Variable var : orderVariables) {
+			//LinkedList<Factor> mentions = var.getFactorsMentionThis();
+			if(true == var.isEvdence) {
+				continue;
+			}
+			
+			LinkedList<Factor> mentions = new LinkedList<>();
+			Iterator<Factor> remainIter = remainFactors.iterator();
+			
+			while(remainIter.hasNext()) {
+				Factor nextFactor = remainIter.next();
+				if(nextFactor.inScope(var)) {
+					mentions.add(nextFactor);
+					remainIter.remove();
+				}
+			}
+			
+			/*if(0 == mentions.size()) { // evidence variable
+				System.out.println("Empty bucket: variable index = " + var.index);
+			}*/
+			
+			ArrayList<Factor> cluster = new ArrayList<>(mentions);
+			clusters.add(cluster);
+		}
+		
+		return clusters;
 	}
 
 	public void startElimination() {
 		//validateFactors();
 		
-		remainFactors = new LinkedList<>(factors);
+		//remainFactors = new LinkedList<>(factors);
 		Eliminator.setFactorCount(factors.size());
 
-		for (Variable var : orderVariables) {
-			
-			LinkedList<Factor> mentions = var.getFactorsMentionThis();
+		while (!orderVariables.isEmpty()) {
+			ArrayList<Factor> cluster = clusters.poll();
+			Variable var = orderVariables.poll();
+				
+			ArrayList<Factor> mentions = cluster;
 			if(mentions.size() == 0) {
 				continue;
 			}
 			Factor newFactor = Eliminator.Product(mentions);
 			newFactor = Eliminator.SumOut(newFactor, var);
 			
-			LinkedList<Factor> mentionsCopy = new LinkedList<>(mentions);
+			/*if(0 == newFactor.numScopes()) {
+				result *= newFactor.getTabelValue(0);
+				emptyFactorCount++;
+				break;
+			}*/
+			
+			boolean putInNewBucket = false;
+			Iterator<Variable> carryVariable = orderVariables.iterator();
+			Iterator<ArrayList<Factor>> carryCluster = clusters.iterator();
+			while(carryVariable.hasNext()) {
+				ArrayList<Factor> nextCluster = carryCluster.next();
+				if(newFactor.inScope(carryVariable.next())) {
+					nextCluster.add(newFactor); // add new factor to next properiate bucket
+					putInNewBucket = true;
+					break;
+				}
+			}
+			
+			if(false == putInNewBucket) {
+				System.out.println("Stop here");
+			}
+			
+			// LinkedList<Factor> mentionsCopy = new LinkedList<>(mentions);
 
 			// remove mention factor from the list of mentions of all the
 			// variables
 			// that get envolved with this factor
-			for (int i = 0; i < mentionsCopy.size(); i++) {
+			/*for (int i = 0; i < mentionsCopy.size(); i++) {
 				Factor mentionFactor = mentionsCopy.get(i);
 				remainFactors.remove(mentionFactor);
 
@@ -407,9 +463,11 @@ public class GraphicalModel {
 					continue;
 				}
 				varScope.addMentionFactor(newFactor);
-			}
+			}*/
+			
+			
 			lastFactor = newFactor;
-			remainFactors.add(newFactor);
+			//remainFactors.add(newFactor);
 			//validateRemainFactors();
 		}
 
@@ -468,7 +526,7 @@ public class GraphicalModel {
 	}
 
 	public void finalize() {
-		for (Factor factor : remainFactors) {
+	/*	for (Factor factor : remainFactors) {
 //			System.out.println("Factor " + factor.index);
 //			for (Variable var : factor.variables) {
 //				System.out.print(var.index + " ");
@@ -481,6 +539,9 @@ public class GraphicalModel {
 //			System.out.println("");
 //			System.out.println("End table");
 			result *= factor.table.get(0);
+		}*/
+		for (Double var : lastFactor.table) {
+			result *= var;
 		}
 	}
 
@@ -512,6 +573,7 @@ public class GraphicalModel {
 			model.readEvidence(fileName + ".evid");
 			writer.println("Evidence loaded, and variables instantiation completed. "
 					+ model.evidenceCount + " evidence");
+			model.generateClusters();
 			model.startElimination();
 			writer.println("Elimination completed");
 			writer.println("");
@@ -523,7 +585,7 @@ public class GraphicalModel {
 
 				writer.println("The probability of evidence = " + model.result);
 				writer.println("");
-
+				System.out.println("Empty Factor Count = " + model.emptyFactorCount);
 			}
 			writer.close();
 		} catch (IOException e) {

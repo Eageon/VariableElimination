@@ -201,7 +201,7 @@ public class Factor {
 		table.clear();
 		table = newTable;
 		
-		variables.remove(index);
+		
 
 //		if(doPrint) {
 //			System.out.println("After reducing");

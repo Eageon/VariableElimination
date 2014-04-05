@@ -25,13 +25,20 @@ public class Variable implements Comparable<Variable> {
 		isEvdence = true;
 		value = observedValue;
 		
-		
 		LinkedList<Factor> factorMentionThisCopy = new LinkedList<>(factorMentionThis);
 		for(Factor factor : factorMentionThisCopy) {
 			// instantiate the variable mentions this variable
 			factor.instantiateVariable(this, observedValue);
-			this.removeMentionFactor(factor);
+			//this.removeMentionFactor(factor);
 		}
+		
+		factorMentionThis.clear();
+		/*for (Variable var : neighbors) {
+			if(var != this) {
+				var.removeNeighbor(this);
+			}
+		}*/
+		neighbors.clear();
 	}
 	
 	public int degree() {
