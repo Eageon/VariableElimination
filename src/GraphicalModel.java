@@ -17,6 +17,7 @@ public class GraphicalModel {
 	LinkedList<Variable> orderVariables;
 	LinkedList<ArrayList<Factor>> clusters;
 	LinkedList<Variable> evidenceVars;
+	ArrayList<Variable> nonEvidenceVars;
 	int evidenceCount = 0;
 	Factor lastFactor;
 
@@ -345,6 +346,8 @@ public class GraphicalModel {
 			}
 		}
 		
+		nonEvidenceVars = varToBeAddToHeap;
+		
 		VariableHeap minHeap = new VariableHeap(varToBeAddToHeap);
 		minHeap.buildHeap();
 		// minHeap.printHeap();
@@ -447,7 +450,7 @@ public class GraphicalModel {
 			}
 			
 			if(false == putInNewBucket) {
-				System.out.println("Stop here");
+				System.out.println(newFactor.table);
 			}
 			
 			// LinkedList<Factor> mentionsCopy = new LinkedList<>(mentions);
@@ -515,7 +518,7 @@ public class GraphicalModel {
 			}
 		}
 		
-		System.out.println("End of validation");
+		//System.out.println("End of validation");
 	}
 	
 	private void validateRemainFactors() {
