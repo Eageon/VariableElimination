@@ -1,0 +1,89 @@
+public ArrayList<Integer> computeSoftOrder() {
+    // number of non-evidence variables
+    int nne = 0;
+    ArrayList<Boolean> processed = new ArrayList<>(nonEvidenceVars.size());
+    for (int i = 0; i < nonEvidenceVars.size(); i++) {
+	processed.add(new Boolean(false));
+    }
+		
+    for (int i = 0; i < nonEvidenceVars.size(); i++) {
+	if (nonEvidenceVars.get(i).isEvidence) {
+	    processed.set(i, true);
+	} else {
+	    nne++;
+	}
+    }
+
+    ArrayList<Integer> order = new ArrayList<Integer>(nne);
+    //ArrayList<Set<Integer>> clusters = new ArrayList<Set<Integer>>(nne);
+    ArrayList<Set<Integer>> graph = new ArrayList<>(nonEvidenceVars.size());
+		
+    for (int i = 0; i < nonEvidenceVars.size(); i++) {
+	graph.add(new HashSet<Integer>());
+    }
+
+    int nonEvidenceCount = 0;
+    for (int i = 0; i < remainFactors.size(); i++) {
+	// Ignore the evidence variables
+	for (int j = 0; j < remainFactors.get(i).variables.size(); j++) {
+	    int a = remainFactors.get(i).variables.get(j).index;
+	    if (nonEvidenceVars.get(a).isEvidence) {
+		continue;
+	    }
+	    for (int k = j + 1; k < remainFactors.get(i).variables.size(); k++) {
+		int b = remainFactors.get(i).variables.get(k).index;
+		if (nonEvidenceVars.get(b).isEvidence) {
+		    continue;
+		}
+		graph.get(a).add(b);
+		graph.get(b).add(a);
+	    }
+	}
+    }
+		
+    for (int i = 0; i < nne; i++) {
+	order.add(-1);
+    }
+
+    /*for (int i = 0; i < nne; i++) {
+      clusters.add(new HashSet<Integer>());
+      }*/
+		
+    int max_cluster_size = 0;
+    for (int i = 0; i < nne; i++) {
+	// Find the node with the minimum number of nodes
+	int min = nonEvidenceVars.size();
+	for (int j = 0; j < graph.size(); j++) {
+	    if (processed.get(j))
+		continue;
+	    if (min > graph.get(j).size()) {
+		// order[i]=j;
+		order.set(i, j);
+		min = graph.get(j).size();
+	    }
+	}
+	// Connect the neighbors of order[i] to each other
+	int var = order.get(i);
+	processed.set(var, true);
+	for (int a = 0; a < graph.get(var).size(); a++) {
+	    for (int b = 0; b < graph.get(var).size(); b++) {
+		if (a == b)
+		    continue;
+		graph.get(a).add(b);
+		graph.get(b).add(a); // issue
+	    }
+	}
+
+	/*clusters.set(i, graph.get(var));
+	  if (clusters.get(i).size() > max_cluster_size) {
+	  max_cluster_size = clusters.get(i).size();
+	  }*/
+	// Remove var from the graph
+	for (int a = 0; a < graph.get(var).size(); a++) {
+	    graph.get(a).remove(var);
+	}
+	graph.get(var).clear();
+    }
+
+    return order;
+}

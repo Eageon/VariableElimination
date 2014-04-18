@@ -1,0 +1,7 @@
+
+import os, sys
+
+PGMs = ["17_4_s.binary.uai", "2_17_s.binary.uai", "2_28_s.binary.uai",
+        "404.wcsp.uai", "54.wcsp.uai"]
+
+

@@ -1,0 +1,184 @@
+public ArrayList<Integer> computeSoftOrder() {
+    // number of non-evidence variables
+    int nne = 0;
+    ArrayList<Boolean> processed = new ArrayList<>(nonEvidenceVars.size());
+    for (int i = 0; i < nonEvidenceVars.size(); i++) {
+	if (nonEvidenceVars.get(i).isEvdence) {
+	    processed.set(i, true);
+	} else {
+	    nne++;
+	}
+    }
+
+    ArrayList<Integer> order = new ArrayList<Integer>(nne);
+    ArrayList<Set<Integer>> clusters = new ArrayList<Set<Integer>>(nne);
+    ArrayList<Set<Integer>> graph = new ArrayList<>(nonEvidenceVars.size());
+
+    for (Set<Integer> set : graph) {
+	set = new HashSet<Integer>();
+    }
+
+    for (Set<Integer> set : clusters) {
+	set = new HashSet<Integer>();
+    }
+
+
+    for (int i = 0; i < factors.size(); i++) {
+	// Ignore the evidence variables
+	for (int j = 0; j < factors.get(i).variables.size(); j++) {
+	    int a = factors.get(i).variables.get(j).index;
+	    if (nonEvidenceVars.get(a).isEvdence)
+		continue;
+	    for (int k = j + 1; k < factors.get(i).variables.size(); k++) {
+		int b = factors.get(i).variables.get(k).index;
+		if (remainvariables.get(b).isEvdence)
+		    continue;
+		graph.get(a).add(b);
+		graph.get(b).add(a);
+	    }
+	}
+    }
+    int max_cluster_size = 0;
+    for (int i = 0; i < nne; i++) {
+	// Find the node with the minimum number of nodes
+	int min = remainvariables.size();
+	for (int j = 0; j < graph.size(); j++) {
+	    if (processed.get(j))
+		continue;
+	    if (min > graph.get(j).size()) {
+		// order[i]=j;
+		order.set(i, j);
+		min = graph.get(j).size();
+	    }
+	}
+// Connect the neighbors of order[i] to each other
+	int var = order.get(i);
+	processed.set(var, true);
+	for (int a = 0; a < graph.size(); a++) {
+	    for (int b = 0; b < graph.size(); b++) {
+		if (a == b)
+		    continue;
+		graph.get(a).add(b);
+		graph.get(b).add(a); // issue
+	    }
+	}
+
+
+	clusters.set(i, graph.get(var));
+	if(clusters.get(i).size() > max_cluster_size) {
+	    max_cluster_size = clusters.get(i).size();
+	}
+	// Remove var from the graph
+	for (int a = 0; a < graph.size(); a++) {
+	    graph.get(a).remove(var);
+	}
+	graph.get(var).clear();
+    }
+
+    return order;
+}
+
+
+double GM::BE(ArrayList<Integer> order)
+{
+    double pe = 1.0;
+    ArrayList<ArrayList<Factor>> buckets = new ArrayList<>(order)	// number of non-evidence variables
+   
+
+    ArrayList<Integer> var_in_pos = new ArrayList<>(nonEvidenceVars.size());
+    for(int i=0;i<order.size();i++) {
+	var_in_pos.set(order.get(i), i);
+    }
+
+    // First put the functions in the proper buckets
+    for(int i=0;i<remainFactors.size();i++)
+    {
+	int pos=nonEvidenceVars.size();
+	// Boundary case
+	// If all variables in a function are evidence variables, simply multiple the entry with pe
+	Factor factor = remainFactors.get(i);
+	boolean all_assigned=true;
+	for(int j=0;j<factor.variables.size();j++)
+	{
+	    if(factor.variables.get(j).isEvdence) {
+		continue;
+	    }
+	    if(var_in_pos.get(factors.variables.get(j).index) < pos)
+		pos = var_in_pos.get(factors.variables.get(j).index);
+	    all_assigned=false;
+	}
+	if(all_assigned) {
+	    pe *= factor.table[Variable::getAddress(function->variables)];
+	}
+	else{
+	    assert(pos!=(int)order.size());
+	    buckets.get(pos).add(factor);
+	}
+    }
+
+    //cout<<"Now processing buckets\n";
+    //Process buckets
+    for(int i=0;i<buckets.size();i++)
+    {
+	if(buckets[i].empty())
+	    continue;
+
+	vector<Variable*> bucket_variables_;
+	for(int j=0;j<buckets[i].size();j++)
+	{
+	    do_set_union(bucket_variables_,buckets[i][j]->variables,
+			 bucket_variables_,less_than_comparator_variable);
+	}
+	vector<Variable*> bucket_variables;
+	for(int j=0;j<bucket_variables_.size();j++) {
+	    if(!bucket_variables_[j]->isEvidence()) {
+		bucket_variables.push_back(bucket_variables_[j]);
+	    }
+	}
+	vector<Variable*> bucket_variable;
+	bucket_variable.push_back(variables[order[i]]);
+	vector<Variable*> marg_variables;
+	do_set_difference(bucket_variables,bucket_variable,
+			  marg_variables,less_than_comparator_variable);
+
+	Function* function= new Function();
+
+	Function::multiplyAndMarginalize(marg_variables,buckets[i],*function,false);
+	if(function->variables.empty())
+	{
+	    assert((int)function->table.size()==1);
+	    pe*=function->table[0];
+	    if (function->id <0) {
+		delete(function);
+	    }
+	    continue;
+	}
+	//Put the function in the appropriate bucket
+	int pos=order.size();
+	for(int j=0;j<function->variables.size();j++)
+	{
+	    if(var_in_pos[function->variables[j]->id] < pos) {
+		pos=var_in_pos[function->variables[j]->id];
+	    }
+	}
+	assert(pos!=(int)order.size());
+	assert(pos > i);
+	buckets[pos].push_back(function);
+	for(int j=0;j<buckets[i].size();j++)
+	{
+	    if (buckets[i][j]!=NULL && buckets[i][j]->id <0){
+		delete(buckets[i][j]);
+	    }
+	}
+	buckets[i].clear();
+    }
+    for(int i=0;i<buckets.size();i++){
+	for(int j=0;j<buckets[i].size();j++){
+	    if (buckets[i][j]!=NULL && buckets[i][j]->id <0){
+		delete(buckets[i][j]);
+	    }
+	}
+    }
+    buckets.clear();
+    return pe;
+}

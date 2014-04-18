@@ -127,6 +127,7 @@ public class GraphicalModel {
 			int domainSize = Integer.valueOf(s);
 			Variable v = new Variable(domainSize);
 			v.index = indexVar++;
+			v.prevIndex = v.index;
 			variables.add(v);
 		}
 
@@ -429,6 +430,8 @@ public class GraphicalModel {
 				continue;
 			}
 			Factor newFactor = Eliminator.Product(mentions);
+			System.out.println("var index = " + var.index + " bucket vars = " + newFactor.variables.size());
+			
 			newFactor = Eliminator.SumOut(newFactor, var);
 			
 			if(0 == newFactor.numScopes()) {
@@ -567,6 +570,7 @@ public class GraphicalModel {
 	public static void main(String[] args) {
 		if (1 != args.length) {
 			usage();
+			System.exit(0);
 		}
 
 		String fileName = args[0];
@@ -585,7 +589,7 @@ public class GraphicalModel {
 			writer.println("Ordering computed");
 			writer.println("Order:");
 			for (Variable var : model.orderVariables) {
-				writer.print(var.index + ", ");
+				writer.print(var.prevIndex + ", ");
 			}
 			writer.println("");
 	

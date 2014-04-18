@@ -7,6 +7,7 @@ public class Variable implements Comparable<Variable> {
 	int value;
 	
 	int index = -1;
+	int prevIndex = -1;
 	
 	LinkedList<Variable> neighbors = new LinkedList<>();
 	LinkedList<Factor> factorMentionThis = new LinkedList<>();
